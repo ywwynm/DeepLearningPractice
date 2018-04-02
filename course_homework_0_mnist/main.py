@@ -28,7 +28,9 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   times = []
-  losses = []
+  cross_entropy_losses = []
+  accuracy_losses = []
+
   print("Start to train classifier --------------------")
   for i in range(epoches):
     batch_x, batch_y = mnist.train.next_batch(batch_size)
@@ -36,17 +38,25 @@ with tf.Session() as sess:
     if i % 10 == 0:
       print("i: ", i, ", loss: ", l)
       times.append(i)
-      losses.append(l)
+      cross_entropy_losses.append(l)
+      pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
+      accuracy = tf.reduce_mean(tf.cast(pred, "float"))
+      accuracy_losses.append(1 - sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels}))
   print("Classifier has been trained --------------------")
 
-  plt.plot(times, losses)
+  plt.plot(times, cross_entropy_losses)
   plt.xlabel('trained times')
   plt.ylabel('cross entropy')
   plt.show()
 
-  pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
-  accuracy = tf.reduce_mean(tf.cast(pred, "float"))
-  print("accuracy", sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels}))
+  plt.plot(times, accuracy_losses)
+  plt.xlabel('trained times')
+  plt.ylabel('1 - accuracy')
+  plt.show()
+
+  # pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
+  # accuracy = tf.reduce_mean(tf.cast(pred, "float"))
+  # print("accuracy", sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels}))
 
 
 # encoded_data = ae.get_encoded_data(mnist, mnist.test.images)
