@@ -7,7 +7,7 @@ import numpy as np
 Get encoded data "compressed" by trained AutoEncoder.
 The test_data should be in shape [?, 784].
 '''
-def get_encoded_data(mnist, test_data):
+def get_trained_encoder(mnist):
 
   def encoder(input):
     l1 = tf.nn.sigmoid(tf.add(tf.matmul(input, weights['encoder_1']), biases['encoder_1']))
@@ -26,16 +26,19 @@ def get_encoded_data(mnist, test_data):
   input_size = 784
   X = tf.placeholder("float", [None, input_size])
 
-  hidden_1_size = 256
-  hidden_2_size = 128
+  hidden_1_size = 512
+  hidden_2_size = 256
 
   weights = {
     'encoder_1': tf.Variable(tf.random_normal([input_size, hidden_1_size])),
-    'encoder_2': tf.Variable(tf.random_normal([hidden_1_size, hidden_2_size])),
+    'encoder_2': tf.Variable(tf.random_normal([hidden_1_size, hidden_2_size]))
 
-    'decoder_2': tf.Variable(tf.random_normal([hidden_2_size, hidden_1_size])),
-    'decoder_1': tf.Variable(tf.random_normal([hidden_1_size, input_size]))
+    # 'decoder_2': tf.Variable(tf.random_normal([hidden_2_size, hidden_1_size])),
+    # 'decoder_1': tf.Variable(tf.random_normal([hidden_1_size, input_size]))
   }
+
+  weights['decoder_2'] = tf.transpose(weights['encoder_2'])
+  weights['decoder_1'] = tf.transpose(weights['encoder_1'])
 
   biases = {
     'encoder_1': tf.Variable(tf.random_normal([hidden_1_size])),
@@ -67,14 +70,17 @@ def get_encoded_data(mnist, test_data):
           print('epoch: ', epoch + 1, ", i: ", i, ", loss: ", l)
 
     print("end training AutoEncoder --------------------------------")
-    encode_result_test = sess.run(y_pred, feed_dict={X: test_data})
-    return encode_result_test
 
-    #
-    # print(encode_result_test)
-    #
+    # encode_result_test = sess.run(y_pred, feed_dict={X: mnist.test.images})
     # f, a = plt.subplots(2, 10, figsize=(10, 2))
     # for i in range(10):
     #   a[0][i].imshow(np.reshape(mnist.test.images[i + 10], (28, 28)))
     #   a[1][i].imshow(np.reshape(encode_result_test[i + 10], (28, 28)))
     # plt.show()
+
+    return encoder
+
+if __name__ == '__main__':
+  from tensorflow.examples.tutorials.mnist import input_data
+  mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+  get_trained_encoder(mnist)
