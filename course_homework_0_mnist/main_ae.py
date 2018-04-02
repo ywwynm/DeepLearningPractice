@@ -29,6 +29,8 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
+  times = []
+  losses = []
   print("Start to train classifier --------------------")
   for i in range(epoches):
     batch_x_ori, batch_y = mnist.train.next_batch(batch_size)
@@ -36,7 +38,14 @@ with tf.Session() as sess:
     _, l = sess.run([optimizer, loss], feed_dict={X: batch_x, y_true: batch_y})
     if i % 10 == 0:
       print("i: ", i, ", loss: ", l)
+      times.append(i)
+      losses.append(l)
   print("Classifier has been trained --------------------")
+
+  plt.plot(times, losses)
+  plt.xlabel('trained times')
+  plt.ylabel('cross entropy')
+  plt.show()
 
   pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
   accuracy = tf.reduce_mean(tf.cast(pred, "float"))
