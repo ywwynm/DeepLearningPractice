@@ -7,11 +7,13 @@ import course_homework_0_mnist.auto_encoder as ae
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
+encoder = ae.get_trained_encoder(mnist)
+
 learning_rate = 0.001
 batch_size = 128
 epoches = 1000
 
-input_size = 784
+input_size = 256
 output_size = 10
 
 X = tf.placeholder("float", [None, input_size])
@@ -29,7 +31,8 @@ with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   print("Start to train classifier --------------------")
   for i in range(epoches):
-    batch_x, batch_y = mnist.train.next_batch(batch_size)
+    batch_x_ori, batch_y = mnist.train.next_batch(batch_size)
+    batch_x = sess.run(encoder(batch_x_ori))  # transform a tf.Tensor to numpy.NdArray
     _, l = sess.run([optimizer, loss], feed_dict={X: batch_x, y_true: batch_y})
     if i % 10 == 0:
       print("i: ", i, ", loss: ", l)
@@ -37,7 +40,4 @@ with tf.Session() as sess:
 
   pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
   accuracy = tf.reduce_mean(tf.cast(pred, "float"))
-  print("accuracy", sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels}))
-
-
-# encoded_data = ae.get_encoded_data(mnist, mnist.test.images)
+  print("accuracy", sess.run(accuracy, feed_dict={X: sess.run(encoder(mnist.test.images)), y_true: mnist.test.labels}))
