@@ -29,19 +29,20 @@ with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   times = []
   cross_entropy_losses = []
-  accuracy_losses = []
+  error_rates = []
 
   print("Start to train classifier --------------------")
   for i in range(epoches):
     batch_x, batch_y = mnist.train.next_batch(batch_size)
     _, l = sess.run([optimizer, loss], feed_dict={X: batch_x, y_true: batch_y})
     if i % 10 == 0:
-      print("i: ", i, ", loss: ", l)
       times.append(i)
       cross_entropy_losses.append(l)
       pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
       accuracy = tf.reduce_mean(tf.cast(pred, "float"))
-      accuracy_losses.append(1 - sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels}))
+      accuracy_val = sess.run(accuracy, feed_dict={X: mnist.test.images, y_true: mnist.test.labels})
+      error_rates.append(1 - accuracy_val)
+      print("i: ", i, ", loss: ", l, ", error rate: ", 1 - accuracy_val)
   print("Classifier has been trained --------------------")
 
   plt.plot(times, cross_entropy_losses)
@@ -49,9 +50,9 @@ with tf.Session() as sess:
   plt.ylabel('cross entropy')
   plt.show()
 
-  plt.plot(times, accuracy_losses)
+  plt.plot(times, error_rates)
   plt.xlabel('trained times')
-  plt.ylabel('1 - accuracy')
+  plt.ylabel('error rate')
   plt.show()
 
   # pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
