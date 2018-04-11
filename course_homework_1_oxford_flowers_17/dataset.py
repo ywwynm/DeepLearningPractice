@@ -1,5 +1,5 @@
-import scipy.io as scio
 import tensorflow as tf
+import scipy.io as scio
 
 PARENT_PATH = "OXFORD_FLOWERS_17_data"
 datasplits = scio.loadmat(PARENT_PATH + "/datasplits.mat")
@@ -10,8 +10,9 @@ def construct_dataset(datasplits_name):
   def _parse_function(filename, label):
     image_string = tf.read_file(filename)
     image_decoded = tf.image.decode_jpeg(image_string)
-    image_resized = tf.image.resize_images(image_decoded, [224, 224])
-    return image_resized, label
+    image_resized = tf.image.resize_image_with_crop_or_pad(image_decoded, 224, 224) # new shape is [3, 224, 224]
+    label_one_hot = tf.one_hot(label, 17, 1, 0)
+    return image_resized, label_one_hot
 
   img_paths = []
   labels = []
@@ -25,8 +26,11 @@ def construct_dataset(datasplits_name):
   dataset = tf.data.Dataset.from_tensor_slices((tf.constant(img_paths), tf.constant(labels)))
   return dataset.map(_parse_function)
 
-def get_train_set_1():
-  return construct_dataset('trn1')
+def get_train_set(idx):
+  return construct_dataset('trn' + str(idx))
 
-def get_validation_set_1():
-  return construct_dataset('val1')
+def get_validation_set(idx):
+  return construct_dataset('val' + str(idx))
+
+def get_test_set(idx):
+  return construct_dataset('tst' + str(idx))
