@@ -2,6 +2,21 @@ import tensorflow as tf
 import course_homework_1_oxford_flowers_17.dataset as dataset
 import matplotlib.pyplot as plt
 
+
+def conv_2d(input, filter_size, in_channel, out_channel, stride):
+  filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel]))
+  conv = tf.nn.conv2d(input, filter, [1, stride, stride, 1], 'SAME')
+  b = tf.Variable(tf.zeros([out_channel]))
+  added = tf.nn.bias_add(conv, b)
+  return tf.nn.relu(added)
+
+def max_pool(input, ksize, stride):
+  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, stride, stride, 1], 'VALID')
+
+def lrn():
+  return tf.nn.lrn()
+
+
 learning_rate = 0.001
 input_size = 224 * 224 * 3
 output_size = 17
