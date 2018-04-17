@@ -7,7 +7,7 @@ learning_rate = 0.001
 input_width = input_height = 224
 channel = 3
 output_size = 17
-batch_size = 64
+batch_size = 32
 epochs = 1000
 
 train_set_1 = dataset.get_train_set(1)
@@ -21,7 +21,7 @@ X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
 y_pred = an.alex_net(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
-loss = -tf.reduce_sum(y_true * tf.nn.log_softmax(y_pred))
+loss = -tf.reduce_sum(y_true * tf.nn.log_softmax(y_pred)) / batch_size
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
 iterator = train_set_1.make_one_shot_iterator()
