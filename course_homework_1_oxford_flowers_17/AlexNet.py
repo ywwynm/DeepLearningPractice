@@ -33,7 +33,10 @@ def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
     activated = tf.nn.softmax(added)
   else:
     activated = added
-  return tf.nn.dropout(activated, keep_prob=keep_prob)
+  if keep_prob > 0:
+    return tf.nn.dropout(activated, keep_prob=keep_prob)
+  else:
+    return activated
 
 
 def alex_net(input):
@@ -50,5 +53,5 @@ def alex_net(input):
   net = lrn(net)
   net = fully_connected(net, n_units=4096, activation='tanh')
   net = fully_connected(net, n_units=4096, activation='tanh')
-  net = fully_connected(net, n_units=17, activation='softmax', keep_prob=1.0)
+  net = fully_connected(net, n_units=17, activation='softmax', keep_prob=-1.0)
   return net

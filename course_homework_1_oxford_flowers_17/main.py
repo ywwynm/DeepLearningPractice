@@ -7,7 +7,7 @@ learning_rate = 0.001
 input_width = input_height = 224
 channel = 3
 output_size = 17
-batch_size = 32
+batch_size = 64
 epochs = 1000
 
 train_set_1 = dataset.get_train_set(1)
@@ -21,7 +21,7 @@ X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
 y_pred = an.alex_net(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
-loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred))
+loss = -tf.reduce_sum(y_true * tf.nn.log_softmax(y_pred))
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
 iterator = train_set_1.make_one_shot_iterator()
@@ -31,13 +31,14 @@ with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   for i in range(epochs):
     X_batch, Y_batch = sess.run(next_element)
-    print(X_batch[0][0][0][0])
-    # _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
-    # if i % 10 == 0:
-    #   # pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
-    #   # accuracy = tf.reduce_mean(tf.cast(pred, "float"))
-    #   # accuracy_val = sess.run(accuracy, feed_dict={X: test_set_1[0], y_true: test_set_1[1]})
-    #   print("i: ", i, ", loss: ", l)
+    # print(X_batch[0][0][0][0])
+    _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
+    if i % 10 == 0:
+      # pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
+      # accuracy = tf.reduce_mean(tf.cast(pred, "float"))
+      # accuracy_val = sess.run(accuracy, feed_dict={X: test_set_1[0], y_true: test_set_1[1]})
+      print("i: ", i, ", loss: ", l)
+
 
 # with tf.Session() as sess:
 #   sess.run(tf.global_variables_initializer())
