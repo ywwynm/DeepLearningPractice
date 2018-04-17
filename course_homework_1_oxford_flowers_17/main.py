@@ -1,51 +1,43 @@
 import tensorflow as tf
 import course_homework_1_oxford_flowers_17.dataset as dataset
 import matplotlib.pyplot as plt
-
-
-def conv_2d(input, filter_size, in_channel, out_channel, stride):
-  filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel]))
-  conv = tf.nn.conv2d(input, filter, [1, stride, stride, 1], 'SAME')
-  b = tf.Variable(tf.zeros([out_channel]))
-  added = tf.nn.bias_add(conv, b)
-  return tf.nn.relu(added)
-
-def max_pool(input, ksize, stride):
-  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, stride, stride, 1], 'VALID')
-
-def lrn():
-  return tf.nn.lrn()
-
+import course_homework_1_oxford_flowers_17.AlexNet as an
 
 learning_rate = 0.001
-input_size = 224 * 224 * 3
+input_width = input_height = 224
+channel = 3
 output_size = 17
 batch_size = 32
-epoches = 1000
+epochs = 1000
 
 train_set_1 = dataset.get_train_set(1)
 test_set_1 = dataset.get_test_set(1)
 
-# train_set_1 = train_set_1.shuffle(buffer_size=10000)
-train_set_1 = train_set_1.repeat(epoches)
+train_set_1 = train_set_1.shuffle(buffer_size=10000)
+train_set_1 = train_set_1.repeat(epochs)
 train_set_1 = train_set_1.batch(batch_size)
 
-X = tf.placeholder(tf.float32, [None, input_size])
-
-W = tf.Variable(tf.zeros([input_size, output_size]))
-b = tf.Variable(tf.zeros([output_size]))
-
-y_pred = tf.nn.softmax(tf.add(tf.matmul(X, W), b))
+X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
+y_pred = an.alex_net(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
-loss = -tf.reduce_sum(y_true * tf.log(y_pred))  # cross entropy
-optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred))
+optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
 iterator = train_set_1.make_one_shot_iterator()
 next_element = iterator.get_next()
 
 with tf.Session() as sess:
-  print(sess.run(next_element))
+  sess.run(tf.global_variables_initializer())
+  for i in range(epochs):
+    X_batch, Y_batch = sess.run(next_element)
+    print(X_batch[0][0][0][0])
+    # _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
+    # if i % 10 == 0:
+    #   # pred = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1))
+    #   # accuracy = tf.reduce_mean(tf.cast(pred, "float"))
+    #   # accuracy_val = sess.run(accuracy, feed_dict={X: test_set_1[0], y_true: test_set_1[1]})
+    #   print("i: ", i, ", loss: ", l)
 
 # with tf.Session() as sess:
 #   sess.run(tf.global_variables_initializer())

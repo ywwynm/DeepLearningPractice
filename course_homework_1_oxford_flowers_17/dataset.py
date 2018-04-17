@@ -10,7 +10,7 @@ def construct_dataset(datasplits_name):
   def _parse_function(filename, label):
     image_string = tf.read_file(filename)
     image_decoded = tf.image.decode_jpeg(image_string)
-    image_resized = tf.image.resize_image_with_crop_or_pad(image_decoded, 224, 224) # new shape is [3, 224, 224]
+    image_resized = tf.image.resize_image_with_crop_or_pad(image_decoded, 224, 224)  # new shape is [224, 224, 3]
     label_one_hot = tf.one_hot(label, 17, 1, 0)
     return image_resized, label_one_hot
 
