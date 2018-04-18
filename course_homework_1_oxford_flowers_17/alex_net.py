@@ -1,11 +1,6 @@
 import tensorflow as tf
 import numpy as np
 
-# import tflearn
-# from tflearn.layers.conv import conv_2d, max_pool_2d
-# from tflearn.layers.core import input_data, dropout, fully_connected
-# from tflearn.layers.normalization import local_response_normalization
-
 def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
   filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel]))
   conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], 'SAME')
