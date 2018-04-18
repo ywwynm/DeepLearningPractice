@@ -1,7 +1,7 @@
 import tensorflow as tf
 import course_homework_1_oxford_flowers_17.dataset as dataset
 import matplotlib.pyplot as plt
-import course_homework_1_oxford_flowers_17.AlexNet as an
+import course_homework_1_oxford_flowers_17.alex_net as an
 
 learning_rate = 0.001
 input_width = input_height = 224
