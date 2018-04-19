@@ -1,9 +1,18 @@
 import tensorflow as tf
 import numpy as np
+import math
 
 def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
   # filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel]) * 1e-4)
+
+  # input_size = 1.0
+  # for dim in shape[:-1]:
+  #   input_size *= float(dim)
+  # max_val = math.sqrt(3 / (filter_size * filter_size * in_channel)) * 1.0
+  # filter = tf.Variable(tf.random_uniform([filter_size, filter_size, in_channel, out_channel], -max_val, max_val))
+
   filter = tf.Variable(tf.random_uniform([filter_size, filter_size, in_channel, out_channel]))
+
   conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], 'SAME')
   b = tf.Variable(tf.zeros([out_channel]))
   added = tf.nn.bias_add(conv, b)
@@ -50,5 +59,5 @@ def alex_net(input):
   net = lrn(net)
   net = fully_connected(net, n_units=4096, activation='tanh')
   net = fully_connected(net, n_units=4096, activation='tanh')
-  net = fully_connected(net, n_units=17, activation='softmax', keep_prob=-1.0)
+  net = fully_connected(net, n_units=17, activation="", keep_prob=-1.0)
   return net
