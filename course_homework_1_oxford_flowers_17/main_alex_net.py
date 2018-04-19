@@ -9,12 +9,12 @@ import time
 train_set_size = 680
 test_set_size = 340
 
-learning_rate = 0.001
+learning_rate = 1e-3
 input_width = input_height = 224
 channel = 3
 output_size = 17
-batch_size = 32
-epochs = 20
+batch_size = 64
+epochs = 1000
 
 train_set_1 = dataset.get_train_set(1)
 test_set_1 = dataset.get_test_set(1)
@@ -28,7 +28,7 @@ X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
 y_pred = an.alex_net(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
-loss = -tf.reduce_sum(y_true * tf.nn.log_softmax(y_pred)) / batch_size
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
 itr_trn_1 = train_set_1.make_initializable_iterator()
@@ -47,6 +47,7 @@ with tf.Session() as sess:
     while True:
       try:
         X_batch, Y_batch = sess.run(next_element_trn_1)
+        real_batch_size = X_batch.shape[0]
         # print(X_batch[0][0][0][0])
         _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
         print("epoch: %d, batch: %d, loss: %f, time cost: %f" % (epoch + 1, batch_idx, l, time.time() - last_train_op_time))
