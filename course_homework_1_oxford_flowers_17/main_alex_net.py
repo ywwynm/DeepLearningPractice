@@ -41,7 +41,7 @@ with tf.Session() as sess:
   start_train_time = time.time()
   print("Start to train classifier")
   for epoch in range(epochs):
-    print("Epoch %d starts" % (epoch + 1))
+    print("------------------ Epoch %d starts ------------------" % (epoch + 1))
     sess.run(itr_trn_1.initializer)
     batch_idx = 1
     while True:
@@ -56,18 +56,20 @@ with tf.Session() as sess:
       except tf.errors.OutOfRangeError:  # this epoch ends
         break
 
-    itr_val_1 = validation_set_1.make_one_shot_iterator()
-    next_element_val_1 = itr_val_1.get_next()
-    pred_vals = []
-    while True:
-      try:
-        X_batch_tst, Y_batch_tst = sess.run(next_element_val_1)
-        pred = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1)), tf.float32)
-        pred_val = sess.run(pred, feed_dict={X: X_batch_tst, y_true: Y_batch_tst})
-        pred_vals.append(pred_val)
-      except tf.errors.OutOfRangeError:
-        break
-    print("accuracy: %f" % (np.mean(pred_vals)))
+    if epoch % 40 == 0:
+      print("------------------ evaluating accuracy on validation set ------------------")
+      itr_val_1 = validation_set_1.make_one_shot_iterator()
+      next_element_val_1 = itr_val_1.get_next()
+      pred_vals = []
+      while True:
+        try:
+          X_batch_tst, Y_batch_tst = sess.run(next_element_val_1)
+          pred = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1)), tf.float32)
+          pred_val = sess.run(pred, feed_dict={X: X_batch_tst, y_true: Y_batch_tst})
+          pred_vals.append(pred_val)
+        except tf.errors.OutOfRangeError:
+          break
+      print("accuracy: %f" % (np.mean(pred_vals)))
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
 

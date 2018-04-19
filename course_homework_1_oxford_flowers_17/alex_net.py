@@ -11,7 +11,7 @@ def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
   # max_val = math.sqrt(3 / (filter_size * filter_size * in_channel)) * 1.0
   # filter = tf.Variable(tf.random_uniform([filter_size, filter_size, in_channel, out_channel], -max_val, max_val))
 
-  filter = tf.Variable(tf.random_uniform([filter_size, filter_size, in_channel, out_channel]))
+  filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel], stddev=0.1))
 
   conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], 'SAME')
   b = tf.Variable(tf.zeros([out_channel]))
@@ -19,9 +19,9 @@ def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
   return tf.nn.relu(added)
 
 def max_pool(input, ksize, strides):
-  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, strides, strides, 1], 'SAME')
+  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, strides, strides, 1], 'VALID')
 
-def lrn(input, depth_radius=5, bias=1.0, alpha=0.0001, beta=0.75):
+def lrn(input, depth_radius=2, bias=2.0, alpha=0.0001, beta=0.75):
   return tf.nn.lrn(input, depth_radius, bias, alpha, beta)
 
 def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
@@ -46,18 +46,18 @@ def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
 
 
 def alex_net(input):
-  net = conv_2d(input, filter_size=11, in_channel=3, out_channel=96, strides=4)
-  net = max_pool(net, ksize=3, strides=2)
+  net = conv_2d(input, filter_size=11, in_channel=3, out_channel=64, strides=4)
   net = lrn(net)
-  net = conv_2d(net, filter_size=5, in_channel=96, out_channel=256)
   net = max_pool(net, ksize=3, strides=2)
+  net = conv_2d(net, filter_size=5, in_channel=64, out_channel=192)
   net = lrn(net)
-  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=384)
-  net = conv_2d(net, filter_size=3, in_channel=384, out_channel=384)
+  net = max_pool(net, ksize=3, strides=2)
+  net = conv_2d(net, filter_size=3, in_channel=192, out_channel=384)
   net = conv_2d(net, filter_size=3, in_channel=384, out_channel=256)
+  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=256)
   net = max_pool(net, ksize=3, strides=2)
-  net = lrn(net)
-  net = fully_connected(net, n_units=4096, activation='tanh')
-  net = fully_connected(net, n_units=4096, activation='tanh')
+  # net = lrn(net)
+  net = fully_connected(net, n_units=4096, activation='relu')
+  net = fully_connected(net, n_units=4096, activation='relu')
   net = fully_connected(net, n_units=17, activation="", keep_prob=-1.0)
   return net
