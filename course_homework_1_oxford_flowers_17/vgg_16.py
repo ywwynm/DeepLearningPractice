@@ -46,26 +46,26 @@ def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
 
 def vgg_16(input):
   net = conv_2d(input, filter_size=3, in_channel=3, out_channel=64, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=64, out_channel=64, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=64, out_channel=64, strides=1)
   net = max_pool(net, ksize=2, strides=2)
 
-  net = conv_2d(input, filter_size=3, in_channel=64, out_channel=128, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=128, out_channel=128, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=64, out_channel=128, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=128, out_channel=128, strides=1)
   net = max_pool(net, ksize=2, strides=2)
 
-  net = conv_2d(input, filter_size=3, in_channel=128, out_channel=256, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=256, out_channel=256, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=256, out_channel=256, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=128, out_channel=256, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=256, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=256, strides=1)
   net = max_pool(net, ksize=2, strides=2)
 
-  net = conv_2d(input, filter_size=3, in_channel=256, out_channel=512, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=512, out_channel=512, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=512, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=512, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=512, out_channel=512, strides=1)
   net = max_pool(net, ksize=2, strides=2)
 
-  net = conv_2d(input, filter_size=3, in_channel=512, out_channel=512, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=512, out_channel=512, strides=1)
-  net = conv_2d(input, filter_size=3, in_channel=512, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=512, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=512, out_channel=512, strides=1)
+  net = conv_2d(net, filter_size=3, in_channel=512, out_channel=512, strides=1)
   net = max_pool(net, ksize=2, strides=2)
 
   net = fully_connected(net, n_units=4096, activation='relu')
