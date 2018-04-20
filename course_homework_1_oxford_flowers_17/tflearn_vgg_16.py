@@ -22,7 +22,7 @@ import tflearn.datasets.oxflower17 as oxflower17
 X, Y = oxflower17.load_data(one_hot=True)
 
 # Building 'VGG Network'
-network = input_data(shape=[None, 224, 224, 3])
+network = input_data(shape=[None, 227, 227, 3])
 
 network = conv_2d(network, 64, 3, activation='relu')
 network = conv_2d(network, 64, 3, activation='relu')
