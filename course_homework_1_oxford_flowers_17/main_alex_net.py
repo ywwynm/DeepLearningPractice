@@ -31,7 +31,7 @@ y_pred = an.alex_net(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
-optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss)
 
 itr_trn_1 = train_set_1.make_initializable_iterator()
 next_element_trn_1 = itr_trn_1.get_next()

@@ -12,7 +12,7 @@ def construct_dataset(datasplits_name):
     image_decoded = tf.image.decode_jpeg(image_string)
     image_resized = tf.image.resize_image_with_crop_or_pad(image_decoded, 224, 224)  # new shape is [224, 224, 3]
     label_one_hot = tf.one_hot(label, 17, 1, 0)
-    return tf.cast(image_resized, tf.float32) / 255.0, label_one_hot
+    return tf.cast(image_resized, tf.float32) / 255.0 - 0.5, label_one_hot
 
   img_paths = []
   labels = []
