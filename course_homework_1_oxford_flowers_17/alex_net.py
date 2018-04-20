@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import math
 
-def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
+def conv_2d(input, filter_size, in_channel, out_channel, strides=1, padding='SAME'):
   # filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel]) * 1e-4)
 
   # input_size = 1.0
@@ -13,15 +13,15 @@ def conv_2d(input, filter_size, in_channel, out_channel, strides=1):
 
   filter = tf.Variable(tf.truncated_normal([filter_size, filter_size, in_channel, out_channel], stddev=0.1))
 
-  conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], 'SAME')
+  conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], padding)
   b = tf.Variable(tf.zeros([out_channel]))
   added = tf.nn.bias_add(conv, b)
   return tf.nn.relu(added)
 
-def max_pool(input, ksize, strides):
-  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, strides, strides, 1], 'VALID')
+def max_pool(input, ksize, strides, padding='VALID'):
+  return tf.nn.max_pool(input, [1, ksize, ksize, 1], [1, strides, strides, 1], padding)
 
-def lrn(input, depth_radius=2, bias=2.0, alpha=0.0001, beta=0.75):
+def lrn(input, depth_radius=2, bias=1.0, alpha=2e-5, beta=0.75):
   return tf.nn.lrn(input, depth_radius, bias, alpha, beta)
 
 def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
@@ -46,16 +46,16 @@ def fully_connected(input, n_units, activation='relu', keep_prob=0.5):
 
 
 def alex_net(input):
-  net = conv_2d(input, filter_size=11, in_channel=3, out_channel=64, strides=4)
+  net = conv_2d(input, filter_size=11, in_channel=3, out_channel=96, strides=4, padding='VALID')
+  net = max_pool(net, ksize=3, strides=2, padding='VALID')
   net = lrn(net)
-  net = max_pool(net, ksize=3, strides=2)
-  net = conv_2d(net, filter_size=5, in_channel=64, out_channel=192)
+  net = conv_2d(net, filter_size=5, in_channel=96, out_channel=256, padding='SAME')
+  net = max_pool(net, ksize=3, strides=2, padding='VALID')
   net = lrn(net)
-  net = max_pool(net, ksize=3, strides=2)
-  net = conv_2d(net, filter_size=3, in_channel=192, out_channel=384)
-  net = conv_2d(net, filter_size=3, in_channel=384, out_channel=256)
-  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=256)
-  net = max_pool(net, ksize=3, strides=2)
+  net = conv_2d(net, filter_size=3, in_channel=256, out_channel=384, padding='SAME')
+  net = conv_2d(net, filter_size=3, in_channel=384, out_channel=384, padding='SAME')
+  net = conv_2d(net, filter_size=3, in_channel=384, out_channel=256, padding='SAME')
+  net = max_pool(net, ksize=3, strides=2, padding='VALID')
   # net = lrn(net)
   net = fully_connected(net, n_units=4096, activation='relu')
   net = fully_connected(net, n_units=4096, activation='relu')
