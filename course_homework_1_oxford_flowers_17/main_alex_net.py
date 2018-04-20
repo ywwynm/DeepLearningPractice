@@ -56,7 +56,7 @@ with tf.Session() as sess:
       except tf.errors.OutOfRangeError:  # this epoch ends
         break
 
-    if epoch % 40 == 0:
+    if (epoch + 1) % 40 == 0:
       print("------------------ evaluating accuracy on validation set ------------------")
       itr_val_1 = validation_set_1.make_one_shot_iterator()
       next_element_val_1 = itr_val_1.get_next()
