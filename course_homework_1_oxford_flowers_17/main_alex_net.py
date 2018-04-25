@@ -39,6 +39,10 @@ next_element_trn_1 = itr_trn_1.get_next()
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   start_train_time = time.time()
+  accuracies = []
+  losses = []
+  epochs_arr = []
+  epochs_10_arr = []
   print("Start to train classifier")
   for epoch in range(epochs):
     print("------------------ Epoch %d starts ------------------" % (epoch + 1))
@@ -47,16 +51,18 @@ with tf.Session() as sess:
     while True:
       try:
         X_batch, Y_batch = sess.run(next_element_trn_1)
-        real_batch_size = X_batch.shape[0]
         # print(X_batch[0][0][0][0])
         last_train_op_time = time.time()
         _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
+        losses.append(l)
+        epochs_arr.append(epoch)
         print("epoch: %d, batch: %d, loss: %f, time cost: %f" % (epoch + 1, batch_idx, l, time.time() - last_train_op_time))
         batch_idx += 1
       except tf.errors.OutOfRangeError:  # this epoch ends
         break
 
-    if (epoch + 1) % 40 == 0:
+    if (epoch + 1) % 10 == 0:
+      print()
       print("------------------ evaluating accuracy on validation set ------------------")
       itr_val_1 = validation_set_1.make_one_shot_iterator()
       next_element_val_1 = itr_val_1.get_next()
@@ -69,7 +75,11 @@ with tf.Session() as sess:
           pred_vals.append(pred_val)
         except tf.errors.OutOfRangeError:
           break
-      print("accuracy: %f" % (np.mean(pred_vals)))
+      accuracy = np.mean(pred_vals)
+      print("accuracy: %f" % accuracy)
+      print()
+      accuracies.append(accuracy)
+      epochs_10_arr.append(epoch + 1)
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
 
