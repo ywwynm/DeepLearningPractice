@@ -14,14 +14,14 @@ input_width = input_height = 224
 channel = 3
 output_size = 17
 batch_size = 64
-epochs = 1000
+epochs = 200
 
 train_set_1 = dataset.get_train_set(1)
 train_set_1 = train_set_1.shuffle(buffer_size=10000)
 train_set_1 = train_set_1.batch(batch_size)
 
 validation_set_1 = dataset.get_validation_set(1)
-validation_set_1 = validation_set_1.batch(2)
+validation_set_1 = validation_set_1.batch(340)
 
 test_set_1 = dataset.get_test_set(1)
 test_set_1 = test_set_1.batch(2)
