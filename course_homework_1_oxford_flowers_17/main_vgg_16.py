@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
-import course_homework_1_oxford_flowers_17.dataset as dataset
+import dataset
 import matplotlib.pyplot as plt
-import course_homework_1_oxford_flowers_17.vgg_16 as vgg
+import vgg_16 as vgg
 
 import time
 
