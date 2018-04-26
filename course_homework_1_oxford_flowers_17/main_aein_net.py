@@ -82,12 +82,5 @@ with tf.Session() as sess:
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
 
-  plt.plot(epochs_arr, losses)
-  plt.xlabel('epoch')
-  plt.ylabel('loss')
-  plt.show()
-
-  plt.plot(epochs_10_arr, accuracies)
-  plt.xlabel('epoch')
-  plt.ylabel('accuracy')
-  plt.show()
+  import course_homework_1_oxford_flowers_17.utils as utils
+  utils.save_result(epochs_arr, losses, epochs_10_arr, accuracies)

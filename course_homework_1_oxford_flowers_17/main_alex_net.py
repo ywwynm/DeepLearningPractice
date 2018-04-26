@@ -83,19 +83,6 @@ with tf.Session() as sess:
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
 
-  import os
-  if not os.path.exists("result"):
-    os.mkdir("result")
-
-  post_fix = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-
-  plt.plot(epochs_arr, losses)
-  plt.xlabel('epoch')
-  plt.ylabel('loss')
-  plt.savefig("result/alex_net_loss_" + post_fix + ".png")
-
-  plt.plot(epochs_10_arr, accuracies)
-  plt.xlabel('epoch')
-  plt.ylabel('accuracy')
-  plt.savefig("result/alex_net_acc_" + post_fix + ".png")
+  import course_homework_1_oxford_flowers_17.utils as utils
+  utils.save_result(epochs_arr, losses, epochs_10_arr, accuracies)
 
