@@ -77,5 +77,5 @@ with tf.Session() as sess:
   print("accuracy: %f" % utils.evaluate(test_set_1, sess, X, y_true, y_pred))
   print()
 
-  utils.save_result(epochs_arr, losses, epochs_10_arr, accuracies)
+  utils.save_result("alex_net", epochs_arr, losses, epochs_10_arr, accuracies)
 
