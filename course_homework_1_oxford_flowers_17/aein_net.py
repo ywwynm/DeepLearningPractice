@@ -17,7 +17,9 @@ def conv_2d(id, input, filter_size, in_channel, out_channel, strides=1, padding=
                            initializer=tf.contrib.layers.xavier_initializer())
 
   conv = tf.nn.conv2d(input, filter, [1, strides, strides, 1], padding)
-  b = tf.Variable(tf.zeros([out_channel]))
+  # b = tf.Variable(tf.zeros([out_channel]))
+  b = tf.get_variable("b_" + str(id), [out_channel],
+                  initializer=tf.contrib.layers.xavier_initializer())
   added = tf.nn.bias_add(conv, b)
   return tf.nn.relu(added)
 
@@ -34,7 +36,9 @@ def fully_connected(id, input, n_units, activation='relu', keep_prob=0.5):
   # W = tf.Variable(tf.truncated_normal([input_size, n_units], stddev=0.2))
   W = tf.get_variable("W_" + str(id), [input_size, n_units],
                            initializer=tf.contrib.layers.xavier_initializer())
-  b = tf.Variable(tf.zeros([n_units]))
+  # b = tf.Variable(tf.zeros([n_units]))
+  b = tf.get_variable("b_" + str(id), [n_units],
+                  initializer=tf.contrib.layers.xavier_initializer())
   added = tf.nn.xw_plus_b(flattened, W, b)
   if activation == 'relu':
     activated = tf.nn.relu(added)
