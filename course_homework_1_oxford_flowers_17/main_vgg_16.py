@@ -3,6 +3,7 @@ import numpy as np
 import dataset
 import matplotlib.pyplot as plt
 import vgg_16 as vgg
+import utils
 
 import time
 
@@ -13,29 +14,25 @@ learning_rate = 1e-3
 input_width = input_height = 224
 channel = 3
 output_size = 17
-batch_size = 32
-epochs = 600
+batch_size = 64
+epochs = 10
 
 train_set_1 = dataset.get_train_set(1)
 train_set_1 = train_set_1.shuffle(buffer_size=10000)
 train_set_1 = train_set_1.batch(batch_size)
 
 validation_set_1 = dataset.get_validation_set(1)
-validation_set_1 = validation_set_1.batch(2)
+validation_set_1 = validation_set_1.batch(340)
 
 test_set_1 = dataset.get_test_set(1)
 test_set_1 = test_set_1.batch(2)
-
-# model = vgg_16.vgg_16()
-# rmsprop = RMSprop()
-# model.compile(loss='categorical_crossentropy', optimizer=rmsprop)
 
 X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
 y_pred = vgg.vgg_16(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
-optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss)
 
 itr_trn_1 = train_set_1.make_initializable_iterator()
 next_element_trn_1 = itr_trn_1.get_next()
@@ -43,7 +40,11 @@ next_element_trn_1 = itr_trn_1.get_next()
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   start_train_time = time.time()
-  print("Start to train VGG-16 classifier")
+  accuracies = []
+  losses = []
+  epochs_arr = []
+  epochs_10_arr = []
+  print("Start to train classifier")
   for epoch in range(epochs):
     print("------------------ Epoch %d starts ------------------" % (epoch + 1))
     sess.run(itr_trn_1.initializer)
@@ -51,28 +52,30 @@ with tf.Session() as sess:
     while True:
       try:
         X_batch, Y_batch = sess.run(next_element_trn_1)
-        real_batch_size = X_batch.shape[0]
         # print(X_batch[0][0][0][0])
         last_train_op_time = time.time()
         _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
+        losses.append(l)
+        epochs_arr.append(epoch)
         print("epoch: %d, batch: %d, loss: %f, time cost: %f" % (epoch + 1, batch_idx, l, time.time() - last_train_op_time))
         batch_idx += 1
       except tf.errors.OutOfRangeError:  # this epoch ends
         break
 
-    if epoch % 40 == 0:
+    if (epoch + 1) % 10 == 0:
+      print()
       print("------------------ evaluating accuracy on validation set ------------------")
-      itr_val_1 = validation_set_1.make_one_shot_iterator()
-      next_element_val_1 = itr_val_1.get_next()
-      pred_vals = []
-      while True:
-        try:
-          X_batch_tst, Y_batch_tst = sess.run(next_element_val_1)
-          pred = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1)), tf.float32)
-          pred_val = sess.run(pred, feed_dict={X: X_batch_tst, y_true: Y_batch_tst})
-          pred_vals.append(pred_val)
-        except tf.errors.OutOfRangeError:
-          break
-      print("accuracy: %f" % (np.mean(pred_vals)))
+      accuracy = utils.evaluate(validation_set_1, sess, X, y_true, y_pred)
+      print("accuracy: %f" % accuracy)
+      print()
+      accuracies.append(accuracy)
+      epochs_10_arr.append(epoch + 1)
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
+  print()
+  print("------------------ evaluating accuracy on test set ------------------")
+  print("accuracy: %f" % utils.evaluate(test_set_1, sess, X, y_true, y_pred))
+  print()
+
+  utils.save_result(epochs_arr, losses, epochs_10_arr, accuracies)
+

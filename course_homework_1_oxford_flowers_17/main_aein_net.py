@@ -3,6 +3,7 @@ import numpy as np
 import dataset
 import matplotlib.pyplot as plt
 import aein_net as an
+import utils
 
 import time
 
@@ -51,7 +52,6 @@ with tf.Session() as sess:
     while True:
       try:
         X_batch, Y_batch = sess.run(next_element_trn_1)
-        real_batch_size = X_batch.shape[0]
         # print(X_batch[0][0][0][0])
         last_train_op_time = time.time()
         _, l = sess.run([optimizer, loss], feed_dict={X: X_batch, y_true: Y_batch})
@@ -63,24 +63,18 @@ with tf.Session() as sess:
         break
 
     if (epoch + 1) % 10 == 0:
+      print()
       print("------------------ evaluating accuracy on validation set ------------------")
-      itr_val_1 = validation_set_1.make_one_shot_iterator()
-      next_element_val_1 = itr_val_1.get_next()
-      pred_vals = []
-      while True:
-        try:
-          X_batch_tst, Y_batch_tst = sess.run(next_element_val_1)
-          pred = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_true, 1)), tf.float32)
-          pred_val = sess.run(pred, feed_dict={X: X_batch_tst, y_true: Y_batch_tst})
-          pred_vals.append(pred_val)
-        except tf.errors.OutOfRangeError:
-          break
-      accuracy = np.mean(pred_vals)
+      accuracy = utils.evaluate(validation_set_1, sess, X, y_true, y_pred)
       print("accuracy: %f" % accuracy)
+      print()
       accuracies.append(accuracy)
       epochs_10_arr.append(epoch + 1)
 
   print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
+  print()
+  print("------------------ evaluating accuracy on test set ------------------")
+  print("accuracy: %f" % utils.evaluate(test_set_1, sess, X, y_true, y_pred))
+  print()
 
-  import utils
   utils.save_result(epochs_arr, losses, epochs_10_arr, accuracies)
