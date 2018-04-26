@@ -10,7 +10,7 @@ import time
 train_set_size = 680
 test_set_size = 340
 
-learning_rate = 1e-3
+learning_rate = 1e-4
 input_width = input_height = 224
 channel = 3
 output_size = 17
@@ -32,7 +32,7 @@ y_pred = vgg.vgg_16(X)
 y_true = tf.placeholder(tf.float32, [None, output_size])
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
-optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss)
+optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(loss)
 
 itr_trn_1 = train_set_1.make_initializable_iterator()
 next_element_trn_1 = itr_trn_1.get_next()
