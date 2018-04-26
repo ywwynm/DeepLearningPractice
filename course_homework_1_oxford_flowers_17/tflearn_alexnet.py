@@ -50,7 +50,7 @@ model.fit(X, Y, n_epoch=500, validation_set=0.5, shuffle=True,
           snapshot_epoch=False, run_id='alexnet_oxflowers17')
 
 
-# import course_homework_1_oxford_flowers_17.dataset as dataset
+# import dataset
 # train_set_1 = dataset.get_train_set(1)
 # train_set_1 = train_set_1.shuffle(buffer_size=10000)
 # train_set_1 = train_set_1.batch(64)
