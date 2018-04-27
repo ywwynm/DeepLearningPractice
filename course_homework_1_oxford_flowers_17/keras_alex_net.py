@@ -1,5 +1,8 @@
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
+from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+
+import keras_dataset as flowers17
 
 
 def alex_net():
@@ -25,3 +28,21 @@ def alex_net():
 
   return model
 
+
+trn_x, trn_y = flowers17.get_images_and_labels('trn1')
+val_x, val_y = flowers17.get_images_and_labels('val1')
+tst_x, tst_y = flowers17.get_images_and_labels('tst1')
+
+trn_data_gen = ImageDataGenerator(rescale=1./255)
+trn_data_gen.fit(trn_x)
+val_data_gen = ImageDataGenerator(rescale=1./255)
+val_data_gen.fit(val_x)
+tst_data_gen = ImageDataGenerator(rescale=1./255)
+tst_data_gen.fit(tst_x)
+
+trn_gen = trn_data_gen.flow(trn_x, trn_y, batch_size=64)
+val_gen = val_data_gen.flow(val_x, val_y, batch_size=64)
+
+model = alex_net()
+model.fit_generator(trn_gen, epochs=200, validation_data=val_gen)
+model.evaluate_generator(tst_data_gen)
