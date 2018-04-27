@@ -1,5 +1,5 @@
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
 
 
 def vgg_16():

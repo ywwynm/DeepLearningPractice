@@ -1,6 +1,7 @@
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
-from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+import keras
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
+from keras.preprocessing.image import ImageDataGenerator
 
 import keras_dataset as flowers17
 
@@ -44,5 +45,7 @@ trn_gen = trn_data_gen.flow(trn_x, trn_y, batch_size=64)
 val_gen = val_data_gen.flow(val_x, val_y, batch_size=64)
 
 model = alex_net()
-model.fit_generator(trn_gen, epochs=200, validation_data=val_gen)
+model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True))
+model.fit_generator(trn_gen, epochs=200, steps_per_epoch=11, validation_data=val_gen, validation_steps=11)
 model.evaluate_generator(tst_data_gen)
