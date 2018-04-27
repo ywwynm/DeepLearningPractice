@@ -17,10 +17,10 @@ def train_and_evaluate(net_name="aein_net", epochs = 250, train_batch_size=64, l
   train_set_1 = train_set_1.batch(train_batch_size)
 
   validation_set_1 = dataset.get_validation_set(1)
-  validation_set_1 = validation_set_1.batch(64)
+  validation_set_1 = validation_set_1.batch(68)
 
   test_set_1 = dataset.get_test_set(1)
-  test_set_1 = test_set_1.batch(64)
+  test_set_1 = test_set_1.batch(68)
 
   X = tf.placeholder(tf.float32, [None, input_height, input_width, channel])
   if net_name == 'aein_net':
