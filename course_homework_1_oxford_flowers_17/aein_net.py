@@ -1,5 +1,3 @@
-import tensorflow as tf
-import numpy as np
 from net import conv_2d, max_pool ,lrn, fully_connected
 
 

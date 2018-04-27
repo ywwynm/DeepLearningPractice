@@ -1,5 +1,3 @@
-import tensorflow as tf
-import numpy as np
 from net import conv_2d, max_pool, fully_connected
 
 def vgg_16(input):
