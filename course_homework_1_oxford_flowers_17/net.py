@@ -23,8 +23,9 @@ def conv_2d(id, input, filter_size, in_channel, out_channel, strides=1, padding=
   # b = tf.get_variable("b_" + str(id), [out_channel],
   #                 initializer=tf.contrib.layers.xavier_initializer())
   added = tf.nn.bias_add(conv, b)
-  bn = tf.layers.batch_normalization(added, training=model.flag_training)
-  return tf.nn.relu(bn)
+  # bn = tf.layers.batch_normalization(added, training=model.flag_training)
+  # return tf.nn.relu(bn)
+  return tf.nn.relu(added)
 
 
 def max_pool(input, ksize, strides, padding='SAME'):

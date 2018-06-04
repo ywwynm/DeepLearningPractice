@@ -4,8 +4,6 @@ import aein_net, alex_net, vgg_16
 import utils
 import time
 
-flag_training = True
-
 def train_and_evaluate(net_name="aein_net", epochs = 250, train_batch_size=64, learning_rate=1e-3, optimizer="adam"):
   train_set_size = 680
   val_test_set_size = 340
@@ -69,7 +67,6 @@ def train_and_evaluate(net_name="aein_net", epochs = 250, train_batch_size=64, l
       batch_idx = 1
       while True:
         try:
-          flag_training = False
           X_batch, Y_batch = sess.run(next_element_trn_1)
           last_train_op_time = time.time()
           _, l = sess.run([train_op, loss], feed_dict={X: X_batch, y_true: Y_batch})
@@ -82,7 +79,6 @@ def train_and_evaluate(net_name="aein_net", epochs = 250, train_batch_size=64, l
           break
 
       if (epoch + 1) % 10 == 0:
-        flag_training = False
         print()
         print("------------------ evaluating accuracy on validation set ------------------")
         accuracy = utils.evaluate(validation_set_1, sess, X, y_true, y_pred)
@@ -94,7 +90,6 @@ def train_and_evaluate(net_name="aein_net", epochs = 250, train_batch_size=64, l
     print("Classifier has been trained, total time: %f" % (time.time() - start_train_time))
     print()
     print("------------------ evaluating accuracy on test set ------------------")
-    flag_training = False
     print("accuracy: %f" % utils.evaluate(test_set_1, sess, X, y_true, y_pred))
     print()
 
