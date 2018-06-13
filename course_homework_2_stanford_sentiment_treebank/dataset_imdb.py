@@ -84,4 +84,4 @@ def load_imdb_dataset_from_combined_file():
   test_labels = load_labels_from_file(os.path.join(dataset_dir, 'test_labels.txt'))
   return (train_sentences, train_labels), (test_sentences, test_labels)
 
-(train_sentences, train_labels), (test_sentences, test_labels) = load_imdb_dataset_maybe_download()
+# (train_sentences, train_labels), (test_sentences, test_labels) = load_imdb_dataset_maybe_download()
