@@ -9,7 +9,7 @@ from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense
 
-def remove_punctuations(sentences):
+def remove_punctuations(sentences):  # 去除句子中的标点符号
   ret = []
   for sent in sentences:
     sent_no_punc = ''
@@ -19,20 +19,22 @@ def remove_punctuations(sentences):
     ret.append(sent_no_punc)
   return ret
 
-def get_word_idx_dict(words):
+def get_word_idx_dict(words):  # 获得单词-序号词典
   counter = Counter(words)
+  print(counter)
   vocab = sorted(counter, key=counter.get, reverse=True)
   return { word: i for i, word in enumerate(vocab, 1) }
 
-def sentence_to_idx(set_no_punc, word_idx_dict):
+def sentence_to_idxs(set_no_punc, word_idx_dict):  # 将一个句子转换为序号序列
   return [word_idx_dict[word] for word in set_no_punc.split()]
 
-def sentences_to_idxs(sentences, word_idx_dict):
-  return [sentence_to_idx(sent, word_idx_dict) for sent in sentences]
+def sentences_to_idxs_list(sentences, word_idx_dict):  # 将多个句子转换为序号序列
+  return [sentence_to_idxs(sent, word_idx_dict) for sent in sentences]
 
-def sentences_idxs_to_net_input(sentences_idxs, max_len):
-  ret = np.zeros(shape=(len(sentences_idxs), max_len), dtype=int)
-  for i, sent_idx in enumerate(sentences_idxs):
+def sentences_idxs_list_to_net_input(sentences_idxs_list, max_len):
+  # 将多个句子序号序列统一长度，转换为网络的输入
+  ret = np.zeros(shape=(len(sentences_idxs_list), max_len), dtype=int)
+  for i, sent_idx in enumerate(sentences_idxs_list):
     ret[i, -len(sent_idx):] = np.array(sent_idx)[:max_len]
   return ret
 
@@ -48,6 +50,8 @@ if __name__ == '__main__':
   all_sentences = []
   all_sentences.extend(train_sentences)
   all_sentences.extend(test_sentences)
+  sentences_lens_counter = Counter([len(sent) for sent in all_sentences])
+  print('max sentence length: %d' % max(sentences_lens_counter))
 
   print('generating all text...')
   start_time = time.time()
@@ -57,23 +61,24 @@ if __name__ == '__main__':
   words = all_text.split()
   word_idx_dict = get_word_idx_dict(words)
   num_features = len(word_idx_dict)
+  print('features(total words) num: %d' % num_features)
 
   print('indexing sentences...')
   start_time = time.time()
-  train_sentences_idxs = sentences_to_idxs(train_sentences, word_idx_dict)
-  test_sentences_idxs = sentences_to_idxs(test_sentences, word_idx_dict)
+  train_sentences_idxs = sentences_to_idxs_list(train_sentences, word_idx_dict)
+  test_sentences_idxs = sentences_to_idxs_list(test_sentences, word_idx_dict)
   print('sentences indexed, costs %.4fs' % (time.time() - start_time))
 
   max_len = 360
-  X_train = sentences_idxs_to_net_input(train_sentences_idxs, max_len)
-  X_test = sentences_idxs_to_net_input(test_sentences_idxs, max_len)
+  X_train = sentences_idxs_list_to_net_input(train_sentences_idxs, max_len)
+  X_test = sentences_idxs_list_to_net_input(test_sentences_idxs, max_len)
 
   Y_train = np.array(train_labels)
   Y_test = np.array(test_labels)
 
   train_batch_size = 32
   test_batch_size = 32
-  train_epochs = 2
+  train_epochs = 1
 
   model = Sequential()
   model.add(Embedding(input_dim=num_features, output_dim=256))
@@ -100,9 +105,12 @@ if __name__ == '__main__':
 
   like_review_1 = 'I love this movie'
   dislike_review_1 = 'I do not like this move'
-  like_review_2 = 'This movie is attractive and it does well on nearly everything even though there are some minor problems on story'
-  dislike_review_2 = 'I have to say that although this movie has some interesting parts it cannot achieve a very good score because it does bad on building impressive characters'
+  like_review_2 = 'This movie is attractive and it does well on nearly everything ' \
+                  'even though there are some minor problems on story'
+  dislike_review_2 = 'I have to say that although this movie has some interesting parts ' \
+                     'it cannot achieve a very good score ' \
+                     'because it does bad on building impressive characters'
   sentences_to_pred = [like_review_1, dislike_review_1, like_review_2, dislike_review_2]
-  sentences_idxs_to_pred = sentences_to_idxs(sentences_to_pred, word_idx_dict)
-  X_predict = sentences_idxs_to_net_input(sentences_idxs_to_pred, max_len)
+  sentences_idxs_to_pred = sentences_to_idxs_list(sentences_to_pred, word_idx_dict)
+  X_predict = sentences_idxs_list_to_net_input(sentences_idxs_to_pred, max_len)
   print(model.predict(X_predict))
