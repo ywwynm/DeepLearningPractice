@@ -1,4 +1,4 @@
-import tensorflow as tf
+import keras
 import os
 import time
 
@@ -49,7 +49,7 @@ def load_imdb_dataset_maybe_download():
 
   print('start getting dataset file by keras...this may cost a long time, please wait patiently, thank you')
   start_time = time.time()
-  dataset_path = tf.keras.utils.get_file(
+  dataset_path = keras.utils.get_file(
     fname="aclImdb.tar.gz",
     origin="http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz",
     extract=True)
