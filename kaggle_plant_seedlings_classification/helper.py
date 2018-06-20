@@ -98,11 +98,9 @@ def train_and_evaluate():
     resize_size=(224, 224), batch_size=batch_size, random_seed=random_seed, show_sample=False)
   print('dataset loaded, cost time: %.4fs' % (time.time() - start_time))
 
-  print(len(train_loader))
-  print(len(valid_loader))
-
-  model = resnet18(pretrained=True).cuda()
+  model = resnet18(pretrained=True)
   replace_model_fc(model)
+  model = model.cuda()
 
   print('fine tuning fc layer..')
   start_time = time.time()
