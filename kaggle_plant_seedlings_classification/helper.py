@@ -17,18 +17,27 @@ lr = 1e-3
 weight_decay = 5e-4
 
 
-def replace_model_fc(model):
+def __replace_model_fc(model):
   model.fc = nn.Linear(512 * 1, 200)
 
 
-def get_model_params(model, only_fc=False):
+def __get_model_params(model, only_fc=False):
   if only_fc:
     return model.fc.parameters()
   else:
     return model.parameters()
 
 
-def evaluate(model, data_loader):
+def get_model(saved_model_path=None):
+  model = resnet18(pretrained=True)
+  __replace_model_fc(model)
+  if saved_model_path is not None:
+    model.load_state_dict(torch.load(saved_model_path))
+  model = model.cuda()
+  return model
+
+
+def __evaluate(model, data_loader):
   model.eval()  # evaluation mode
 
   start_time = time.time()
@@ -51,12 +60,12 @@ def evaluate(model, data_loader):
   return acc
 
 
-def _train_and_evaluate(model, loaders, only_fc=False):
+def __train_and_evaluate(model, loaders, only_fc=False):
   train_loader = loaders[0]
   valid_loader = loaders[1]
   criterion = nn.CrossEntropyLoss().cuda()
   optimizer = optim.SGD(
-    get_model_params(model, only_fc),
+    __get_model_params(model, only_fc),
     lr=lr,
     momentum=0.9,
     weight_decay=weight_decay
@@ -86,21 +95,23 @@ def _train_and_evaluate(model, loaders, only_fc=False):
 
     if epoch == 0 or (epoch + 1) % eval_epoch_step == 0:
       print('evaluating on train set during training, epoch: %d' % epoch)
-      evaluate(model, train_loader)
+      __evaluate(model, train_loader)
       print('evaluating on validation set during training, epoch: %d' % epoch)
-      val_acc = evaluate(model, valid_loader)
+      val_acc = __evaluate(model, valid_loader)
       if val_acc >= max_val_acc:
         max_val_acc = val_acc
         best_state_dict = model.state_dict()
 
   print('model is trained')
   print('evaluating on validation set')
-  evaluate(model, valid_loader)
+  __evaluate(model, valid_loader)
 
   print('saving model...')
   if not os.path.exists('models'):
     os.mkdir('models')
-  torch.save(best_state_dict, os.path.join('models', 'model-acc%.2f-%s.pth' % (max_val_acc, time.strftime('M-d-H:mm'))))
+  model_path = os.path.join('models', 'model-acc%.2f-%s.pth' % (max_val_acc, time.strftime('M-d-H:mm')))
+  torch.save(best_state_dict, model_path)
+  return model_path
 
 
 def train_and_evaluate():
@@ -110,17 +121,15 @@ def train_and_evaluate():
     resize_size=(224, 224), batch_size=batch_size, random_seed=random_seed, show_sample=False)
   print('dataset loaded, cost time: %.4fs' % (time.time() - start_time))
 
-  model = resnet18(pretrained=True)
-  replace_model_fc(model)
-  model = model.cuda()
+  model = get_model()
 
   print('fine tuning fc layer..')
   start_time = time.time()
-  _train_and_evaluate(model, [train_loader, valid_loader], only_fc=True)
+  __train_and_evaluate(model, [train_loader, valid_loader], only_fc=True)
   print('fc layer tuned, cost time: %.4fs' % (time.time() - start_time))
 
   print('\nfine tuning all layers')
   start_time = time.time()
-  _train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)
+  __train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)
   print('all layers tuned, cost time: %.4fs' % (time.time() - start_time))
 
