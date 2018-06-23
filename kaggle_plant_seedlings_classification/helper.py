@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision.models import *
+import torchvision.transforms as transforms
 
 import dataset
 
@@ -112,6 +113,18 @@ def __train_and_evaluate(model, loaders, only_fc=False):
   model_path = os.path.join('models', 'model-acc%.2f-%s.pth' % (max_val_acc, time.strftime('M-d-H:mm')))
   torch.save(best_state_dict, model_path)
   return model_path
+
+
+def predict(model, img_pils):
+  predicts = []
+  transform = transforms.Compose([transforms.ToTensor()])
+  for img_pil in img_pils:
+    img_tensor = transform(img_pil)
+    img_tensor = img_tensor.unsqueeze(0).cuda()
+    output = model(img_tensor)
+    predict = torch.argmax(output.data, 1)
+    predicts.append(predict)
+  return predicts
 
 
 def train_and_evaluate():
