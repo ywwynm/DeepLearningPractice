@@ -1,4 +1,4 @@
-import time
+import time, os
 
 import torch
 import torch.nn as nn
@@ -63,6 +63,8 @@ def _train_and_evaluate(model, loaders, only_fc=False):
   )
 
   print('start training...')
+  max_val_acc = 0.0
+  best_state_dict = None
   for epoch in range(num_epoch):
     running_loss = 0.0
     for i, (_, Xs, Ys) in enumerate(train_loader, 0):
@@ -85,10 +87,20 @@ def _train_and_evaluate(model, loaders, only_fc=False):
     if epoch == 0 or (epoch + 1) % eval_epoch_step == 0:
       print('evaluating on train set during training, epoch: %d' % epoch)
       evaluate(model, train_loader)
+      print('evaluating on validation set during training, epoch: %d' % epoch)
+      val_acc = evaluate(model, valid_loader)
+      if val_acc >= max_val_acc:
+        max_val_acc = val_acc
+        best_state_dict = model.state_dict()
 
   print('model is trained')
   print('evaluating on validation set')
   evaluate(model, valid_loader)
+
+  print('saving model...')
+  if not os.path.exists('models'):
+    os.mkdir('models')
+  torch.save(best_state_dict, os.path.join('models', 'model-acc%.2f-%s.pth' % (max_val_acc, time.strftime('M-d-H:mm'))))
 
 
 def train_and_evaluate():
