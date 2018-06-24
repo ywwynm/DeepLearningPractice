@@ -12,7 +12,7 @@ random_seed = 96
 validation_size = 0.3
 eval_epoch_step = 1
 
-num_epoch = 30
+num_epoch = 20
 batch_size = 32
 lr = 1e-3
 weight_decay = 5e-4
@@ -39,7 +39,6 @@ def get_model(saved_model_path=None):
   model = model.cuda()
   return model
 
-
 def __evaluate(model, data_loader):
   model.eval()  # evaluation mode
 
@@ -51,10 +50,10 @@ def __evaluate(model, data_loader):
       _, Xs, Ys = data
       Xs = Xs.cuda()
       Ys = Ys.cuda()
-      predict = model(Xs)
-      _, predicted = torch.max(predict.data, 1)
+      output = model(Xs)
+      predicts = torch.argmax(output.data, 1)
       total_num += Xs.size(0)
-      correct_num += (predicted == Ys).sum().item()
+      correct_num += (predicts == Ys).sum().item()
 
   model.train()  # back to train mode
 
@@ -121,17 +120,19 @@ def __train_and_evaluate(model, loaders, only_fc=False):
 
 
 def predict(model, img_pils):
+  model.eval()
   predicts = []
   transform = transforms.Compose([
     transforms.Resize(size=(224, 224)),
     transforms.ToTensor()
   ])
-  for img_pil in img_pils:
-    img_tensor = transform(img_pil)
-    img_tensor = img_tensor.unsqueeze(0).cuda()
-    output = model(img_tensor)
-    predict = torch.argmax(output.data, 1)
-    predicts.append(predict.item())
+  with torch.no_grad():
+    for img_pil in img_pils:
+      img_tensor = transform(img_pil)
+      img_tensor = img_tensor.unsqueeze(0).cuda()
+      output = model(img_tensor)
+      predict = torch.argmax(output.data, 1)
+      predicts.append(predict.item())
   return predicts
 
 
