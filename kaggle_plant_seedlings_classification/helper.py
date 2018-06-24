@@ -12,10 +12,12 @@ random_seed = 96
 validation_size = 0.3
 eval_epoch_step = 1
 
-num_epoch = 32
+num_epoch = 30
 batch_size = 32
 lr = 1e-3
 weight_decay = 5e-4
+
+save_model = False
 
 
 def __replace_model_fc(model):
@@ -95,9 +97,9 @@ def __train_and_evaluate(model, loaders, only_fc=False):
       print('cost time: %.4fs' % (time.time() - start_time))
 
     if epoch == 0 or (epoch + 1) % eval_epoch_step == 0:
-      print('evaluating on train set during training, epoch: %d' % epoch)
+      print('evaluating on train set during training, epoch: %d' % (epoch + 1))
       __evaluate(model, train_loader)
-      print('evaluating on validation set during training, epoch: %d' % epoch)
+      print('evaluating on validation set during training, epoch: %d' % (epoch + 1))
       val_acc = __evaluate(model, valid_loader)
       if val_acc >= max_val_acc:
         max_val_acc = val_acc
@@ -107,23 +109,29 @@ def __train_and_evaluate(model, loaders, only_fc=False):
   print('evaluating on validation set')
   __evaluate(model, valid_loader)
 
-  print('saving model...')
-  if not os.path.exists('models'):
-    os.mkdir('models')
-  model_path = os.path.join('models', 'model-acc%.2f-%s.pth' % (max_val_acc, time.strftime('M-d-H:mm')))
-  torch.save(best_state_dict, model_path)
-  return model_path
+  if save_model:
+    print('saving model...')
+    if not os.path.exists('models'):
+      os.mkdir('models')
+    model_path = os.path.join('models', 'model-acc%.2f-%s.pth' %
+                              (max_val_acc, time.strftime('%m-%d-%H-%M', time.localtime())))
+    torch.save(best_state_dict, model_path)
+    return model_path
+  else: return ""
 
 
 def predict(model, img_pils):
   predicts = []
-  transform = transforms.Compose([transforms.ToTensor()])
+  transform = transforms.Compose([
+    transforms.Resize(size=(224, 224)),
+    transforms.ToTensor()
+  ])
   for img_pil in img_pils:
     img_tensor = transform(img_pil)
     img_tensor = img_tensor.unsqueeze(0).cuda()
     output = model(img_tensor)
     predict = torch.argmax(output.data, 1)
-    predicts.append(predict)
+    predicts.append(predict.item())
   return predicts
 
 
@@ -136,13 +144,18 @@ def train_and_evaluate():
 
   model = get_model()
 
+  global save_model
+
   print('fine tuning fc layer..')
+  save_model = False
   start_time = time.time()
   __train_and_evaluate(model, [train_loader, valid_loader], only_fc=True)
   print('fc layer tuned, cost time: %.4fs' % (time.time() - start_time))
 
   print('\nfine tuning all layers')
+  save_model = True
   start_time = time.time()
-  __train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)
+  model_path = __train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)
   print('all layers tuned, cost time: %.4fs' % (time.time() - start_time))
+  return model_path
 
