@@ -7,6 +7,7 @@ from torchvision.models import *
 import torchvision.transforms as transforms
 
 import dataset
+from bcnn import BilinearResNet34
 
 random_seed = 96
 validation_size = 0.3
@@ -30,8 +31,10 @@ def __get_model_params(model, only_fc=False):
 
 
 def get_model(saved_model_path=None):
-  model = resnet18(pretrained=True)
-  __replace_model_fc(model)
+  # model = resnet18(pretrained=True)
+  # __replace_model_fc(model)
+
+  model = BilinearResNet34()
   if saved_model_path is not None:
     model.load_state_dict(torch.load(saved_model_path))
   model = model.cuda()
