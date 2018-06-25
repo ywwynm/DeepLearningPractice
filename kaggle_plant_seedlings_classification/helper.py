@@ -108,7 +108,9 @@ def __train_and_evaluate(model, loaders, only_fc=False):
         best_state_dict = model.state_dict()
 
   print('model is trained')
-  print('evaluating on validation set')
+
+  model.load_state_dict(best_state_dict)
+  print('evaluating on validation set with best model')
   __evaluate(model, valid_loader)
 
   if save_model:
