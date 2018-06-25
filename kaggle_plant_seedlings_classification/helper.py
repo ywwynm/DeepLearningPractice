@@ -21,6 +21,8 @@ weight_decay = 5e-4
 
 save_model = False
 
+outputs_dir = os.path.join('outputs', 'output_' + time.strftime("%m-%d-%H-%M", time.localtime()))
+
 
 def __replace_model_fc(model):
   model.fc = nn.Linear(512 * 1, 200)
@@ -45,10 +47,6 @@ def get_model(saved_model_path=None):
 
 
 def __save_plot(Y_values, name, multiply_epoch_step=True):
-  if not os.path.exists('plots'):
-    os.mkdir('plots')
-  post_fix = time.strftime("%m-%d-%H-%M", time.localtime())
-
   if multiply_epoch_step:
     X_values = [(i + 1) * eval_epoch_step for i in range(len(Y_values))]
   else:
@@ -58,7 +56,7 @@ def __save_plot(Y_values, name, multiply_epoch_step=True):
   plt.plot(X_values, Y_values)
   plt.xlabel('epoch')
   plt.ylabel(name)
-  plt.savefig(os.path.join('plots', name + '_' + post_fix + '.png'))
+  plt.savefig(os.path.join(outputs_dir, name + '.png'))
 
 
 def __evaluate(model, data_loader):
@@ -151,10 +149,7 @@ def __train_and_evaluate(model, loaders, only_fc=False):
 
   if save_model:
     print('saving model...')
-    if not os.path.exists('models'):
-      os.mkdir('models')
-    model_path = os.path.join('models', 'model-acc%.2f-%s.pth' %
-                              (max_val_acc, time.strftime('%m-%d-%H-%M', time.localtime())))
+    model_path = os.path.join(outputs_dir, 'model.pth')
     torch.save(best_state_dict, model_path)
     return model_path
   else: return ""
@@ -178,6 +173,9 @@ def predict(model, img_pils):
 
 
 def train_and_evaluate():
+  if not os.path.exists(outputs_dir):
+    os.makedirs(outputs_dir)
+
   start_time = time.time()
   print('loading dataset...')
   train_loader, valid_loader = dataset.get_train_validation_data_loader(
