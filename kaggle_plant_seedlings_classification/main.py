@@ -29,4 +29,4 @@ if __name__ == '__main__':
 
   pd_data = {'file': img_names, 'species': predict_classes}
   df = pd.DataFrame(pd_data)
-  df.to_csv('prediction_%s.csv' % time.strftime('%m-%d-%H-%M', time.localtime()), index=False)
+  df.to_csv(os.path.join(helper.outputs_dir, 'prediction.csv'), index=False)
