@@ -5,15 +5,16 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision.models import *
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 import dataset
 from bcnn import BilinearResNet34
 
 random_seed = 96
 validation_size = 0.3
-eval_epoch_step = 1
+eval_epoch_step = 2
 
-num_epoch = 20
+num_epoch = 10
 batch_size = 32
 lr = 1e-3
 weight_decay = 5e-4
@@ -33,14 +34,32 @@ def __get_model_params(model, only_fc=False):
 
 
 def get_model(saved_model_path=None):
-  # model = resnet18(pretrained=True)
-  # __replace_model_fc(model)
+  model = resnet18(pretrained=True)
+  __replace_model_fc(model)
 
-  model = BilinearResNet34()
+  # model = BilinearResNet34()
   if saved_model_path is not None:
     model.load_state_dict(torch.load(saved_model_path))
   model = model.cuda()
   return model
+
+
+def __save_plot(Y_values, name, multiply_epoch_step=True):
+  if not os.path.exists('plots'):
+    os.mkdir('plots')
+  post_fix = time.strftime("%m-%d-%H-%M", time.localtime())
+
+  if multiply_epoch_step:
+    X_values = [(i + 1) * eval_epoch_step for i in range(len(Y_values))]
+  else:
+    X_values = [i + 1 for i in range(len(Y_values))]
+
+  plt.clf()
+  plt.plot(X_values, Y_values)
+  plt.xlabel('epoch')
+  plt.ylabel(name)
+  plt.savefig(os.path.join('plots', name + '_' + post_fix + '.png'))
+
 
 def __evaluate(model, data_loader):
   model.eval()  # evaluation mode
@@ -77,10 +96,17 @@ def __train_and_evaluate(model, loaders, only_fc=False):
   )
 
   print('start training...')
+
   max_val_acc = 0.0
   best_state_dict = None
+
+  trn_losses_arr = []
+  trn_acc_arr = []
+  val_acc_arr = []
+
   for epoch in range(num_epoch):
     running_loss = 0.0
+    batch_num = 0
     for i, (_, Xs, Ys) in enumerate(train_loader, 0):
       start_time = time.time()
 
@@ -94,15 +120,21 @@ def __train_and_evaluate(model, loaders, only_fc=False):
       optimizer.step()
 
       running_loss += loss.item()
+      batch_num = i
 
       print('[%d, %5d] loss: %.6f' % (epoch + 1, i + 1, loss.item()))
       print('cost time: %.4fs' % (time.time() - start_time))
 
-    if epoch == 0 or (epoch + 1) % eval_epoch_step == 0:
+    trn_losses_arr.append(running_loss / batch_num)
+
+    if (epoch + 1) % eval_epoch_step == 0:
       print('evaluating on train set during training, epoch: %d' % (epoch + 1))
-      __evaluate(model, train_loader)
+      trn_acc = __evaluate(model, train_loader)
+      trn_acc_arr.append(trn_acc)
+
       print('evaluating on validation set during training, epoch: %d' % (epoch + 1))
       val_acc = __evaluate(model, valid_loader)
+      val_acc_arr.append(val_acc)
       if val_acc >= max_val_acc:
         max_val_acc = val_acc
         best_state_dict = model.state_dict()
@@ -112,6 +144,10 @@ def __train_and_evaluate(model, loaders, only_fc=False):
   model.load_state_dict(best_state_dict)
   print('evaluating on validation set with best model')
   __evaluate(model, valid_loader)
+
+  __save_plot(trn_losses_arr, 'trn_loss', multiply_epoch_step=False)
+  __save_plot(trn_acc_arr, 'trn_acc')
+  __save_plot(val_acc_arr, 'val_acc')
 
   if save_model:
     print('saving model...')
