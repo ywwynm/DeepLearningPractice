@@ -1,4 +1,4 @@
-import time, os
+import time, os, copy
 
 import torch
 import torch.nn as nn
@@ -11,7 +11,7 @@ import dataset
 from bcnn import BilinearResNet34
 
 random_seed = 96
-validation_size = 0.3
+validation_size = 0.2
 eval_epoch_step = 2
 
 num_epoch = 10  # will be changed when fine tuning fc and all layers
@@ -135,7 +135,7 @@ def __train_and_evaluate(model, loaders, only_fc=False):
       val_acc_arr.append(val_acc)
       if val_acc >= max_val_acc:
         max_val_acc = val_acc
-        best_state_dict = model.state_dict()
+        best_state_dict = copy.deepcopy(model.state_dict())
 
   print('model is trained')
 
