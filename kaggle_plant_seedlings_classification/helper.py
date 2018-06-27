@@ -11,8 +11,9 @@ import dataset
 from bcnn import BilinearResNet34
 
 random_seed = 96
-validation_size = 0.2
-eval_epoch_step = 2
+validation_size = 0.001
+eval_epoch_step = 4
+resize_size = 448
 
 num_epoch = 10  # will be changed when fine tuning fc and all layers
 batch_size = 32
@@ -159,7 +160,7 @@ def predict(model, img_pils):
   model.eval()
   predicts = []
   transform = transforms.Compose([
-    transforms.Resize(size=(224, 224)),
+    transforms.Resize(size=(resize_size, resize_size)),
     transforms.ToTensor()
   ])
   with torch.no_grad():
@@ -179,7 +180,7 @@ def train_and_evaluate():
   start_time = time.time()
   print('loading dataset...')
   train_loader, valid_loader = dataset.get_train_validation_data_loader(
-    resize_size=(224, 224), batch_size=batch_size, random_seed=random_seed, show_sample=False)
+    resize_size=(resize_size, resize_size), batch_size=batch_size, random_seed=random_seed, show_sample=False)
   print('dataset loaded, cost time: %.4fs' % (time.time() - start_time))
 
   model = get_model()
