@@ -69,9 +69,11 @@ def get_train_validation_data_loader(
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
         transforms.RandomRotation(15),
-        transforms.RandomRotation(60)
+        transforms.RandomRotation(60),
+        transforms.RandomRotation(105),
+        transforms.RandomRotation(180)
       ]),
-    ], p=0.4)
+    ], p=0.5)
     train_transform = transforms.Compose([
       transforms.Resize(resize_size),
       transforms_random_apply,
