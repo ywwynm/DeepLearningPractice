@@ -53,13 +53,19 @@ class PlantDataset(Dataset):
 
 
 def get_train_validation_data_loader(
-    resize_size, batch_size, random_seed, augment=False,
+    resize_size, batch_size, random_seed, use_normalize=False, augment=False,
     validation_size=0.3, shuffle=True, show_sample=False):
 
-  # normalize = transforms.Normalize(
-  #   mean=[0.485, 0.456, 0.406],
-  #   std=[0.229, 0.224, 0.225],
-  # )
+  if use_normalize:
+    normalize = transforms.Normalize(
+      mean=[0.485, 0.456, 0.406],
+      std=[0.229, 0.224, 0.225],
+    )
+  else:
+    normalize = transforms.Normalize(
+      mean=[0.0, 0.0, 0.0],
+      std=[1.0, 1.0, 1.0],
+    )
 
   # images are all square
   if augment:
@@ -78,19 +84,19 @@ def get_train_validation_data_loader(
       transforms.Resize(resize_size),
       transforms_random_apply,
       transforms.ToTensor(),
-      # normalize
+      normalize
     ])
   else:
     train_transform = transforms.Compose([
       transforms.Resize(resize_size),
       transforms.ToTensor(),
-      # normalize
+      normalize
     ])
 
   valid_transform = transforms.Compose([
     transforms.Resize(resize_size),
     transforms.ToTensor(),
-    # normalize
+    normalize
   ])
 
   train_dataset = PlantDataset(transform=train_transform)

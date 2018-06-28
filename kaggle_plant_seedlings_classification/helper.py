@@ -13,6 +13,8 @@ from bcnn import BilinearResNet34
 random_seed = 96
 validation_size = 0.3
 eval_epoch_step = 4
+
+use_normalize = True
 resize_size = 224
 augment = True
 
@@ -160,10 +162,23 @@ def __train_and_evaluate(model, loaders, only_fc=False):
 def predict(model, img_pils):
   model.eval()
   predicts = []
+
+  if use_normalize:
+    normalize = transforms.Normalize(
+      mean=[0.485, 0.456, 0.406],
+      std=[0.229, 0.224, 0.225],
+    )
+  else:
+    normalize = transforms.Normalize(
+      mean=[0.0, 0.0, 0.0],
+      std=[1.0, 1.0, 1.0],
+    )
   transform = transforms.Compose([
     transforms.Resize(size=(resize_size, resize_size)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    normalize
   ])
+
   with torch.no_grad():
     for img_pil in img_pils:
       img_tensor = transform(img_pil)
@@ -181,7 +196,8 @@ def train_and_evaluate():
   start_time = time.time()
   print('loading dataset...')
   train_loader, valid_loader = dataset.get_train_validation_data_loader(
-    resize_size=(resize_size, resize_size), batch_size=batch_size, random_seed=random_seed, augment=augment, show_sample=False)
+    resize_size=(resize_size, resize_size), batch_size=batch_size, random_seed=random_seed,
+    use_normalize=use_normalize, augment=augment, show_sample=False)
   print('dataset loaded, cost time: %.4fs' % (time.time() - start_time))
 
   model = get_model()
@@ -196,7 +212,7 @@ def train_and_evaluate():
   print('fc layer tuned, cost time: %.4fs' % (time.time() - start_time))
 
   print('\nfine tuning all layers')
-  num_epoch = 200
+  num_epoch = 120
   save_model = True
   start_time = time.time()
   model_path = __train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)
