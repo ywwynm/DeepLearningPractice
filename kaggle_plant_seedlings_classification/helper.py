@@ -11,9 +11,10 @@ import dataset
 from bcnn import BilinearResNet34
 
 random_seed = 96
-validation_size = 0.001
+validation_size = 0.3
 eval_epoch_step = 4
-resize_size = 448
+resize_size = 224
+augment = True
 
 num_epoch = 10  # will be changed when fine tuning fc and all layers
 batch_size = 32
@@ -180,7 +181,7 @@ def train_and_evaluate():
   start_time = time.time()
   print('loading dataset...')
   train_loader, valid_loader = dataset.get_train_validation_data_loader(
-    resize_size=(resize_size, resize_size), batch_size=batch_size, random_seed=random_seed, show_sample=False)
+    resize_size=(resize_size, resize_size), batch_size=batch_size, random_seed=random_seed, augment=augment, show_sample=False)
   print('dataset loaded, cost time: %.4fs' % (time.time() - start_time))
 
   model = get_model()
