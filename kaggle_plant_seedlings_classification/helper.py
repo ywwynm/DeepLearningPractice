@@ -14,8 +14,8 @@ random_seed = 96
 validation_size = 0.3
 eval_epoch_step = 4
 
-use_normalize = True
-resize_size = 224
+use_normalize = False
+resize_size = 448
 augment = True
 
 num_epoch = 10  # will be changed when fine tuning fc and all layers
