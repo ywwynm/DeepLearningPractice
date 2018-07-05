@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 import dataset
 from bcnn import BilinearResNet34
 
-random_seed = 96
+random_seed = 96  # for splitting train set and validation set
 validation_size = 0.3
 eval_epoch_step = 4
 
+use_bilinear = True
 use_normalize = False
 resize_size = 448
 augment = True
@@ -23,13 +24,13 @@ batch_size = 32
 lr = 1e-3
 weight_decay = 5e-4
 
-save_model = False
+save_model = False  # will be changed when fine tuning fc and all layers
 
 outputs_dir = os.path.join('outputs', 'output_' + time.strftime("%m-%d-%H-%M", time.localtime()))
 
 
 def __replace_model_fc(model):
-  model.fc = nn.Linear(512 * 1, 200)
+  model.fc = nn.Linear(512 * 1, 12)
 
 
 def __get_model_params(model, only_fc=False):
@@ -40,10 +41,12 @@ def __get_model_params(model, only_fc=False):
 
 
 def get_model(saved_model_path=None):
-  # model = resnet18(pretrained=True)
-  # __replace_model_fc(model)
+  if use_bilinear:
+    model = BilinearResNet34()
+  else:
+    model = resnet34(pretrained=True)
+    __replace_model_fc(model)
 
-  model = BilinearResNet34()
   if saved_model_path is not None:
     model.load_state_dict(torch.load(saved_model_path))
   model = model.cuda()
@@ -212,7 +215,7 @@ def train_and_evaluate():
   print('fc layer tuned, cost time: %.4fs' % (time.time() - start_time))
 
   print('\nfine tuning all layers')
-  num_epoch = 120
+  num_epoch = 200
   save_model = True
   start_time = time.time()
   model_path = __train_and_evaluate(model, [train_loader, valid_loader], only_fc=False)

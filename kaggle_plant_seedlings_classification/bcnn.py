@@ -4,7 +4,6 @@ from torchvision.models import resnet34
 class BilinearResNet34(torch.nn.Module):
 
   def __init__(self):
-    """Declare all needed layers."""
     torch.nn.Module.__init__(self)
     resnet_model = resnet34(pretrained=True)
 
@@ -17,7 +16,6 @@ class BilinearResNet34(torch.nn.Module):
     self.layer3 = resnet_model.layer3
     self.layer4 = resnet_model.layer4
 
-    # Linear classifier.
     self.fc = torch.nn.Linear(512**2, 12)
 
     # Initialize the fc layers.
@@ -27,7 +25,7 @@ class BilinearResNet34(torch.nn.Module):
 
   def forward(self, X):
     N = X.size()[0]
-    # assert X.size() == (N, 3, 448, 448)
+    # assert X.size() == (N, 3, 448, 448)  # if input image size is 448
 
     x = self.conv1(X)
     x = self.bn1(x)
@@ -42,7 +40,7 @@ class BilinearResNet34(torch.nn.Module):
     x_size = x.size()
     feature_size = x_size[2]
 
-    # assert X.size() == (N, 512, 14, 14)
+    # assert X.size() == (N, 512, 14, 14)  # replace 14 with 7 if input image size is 224 instead of 448
 
     x = x.view(N, 512, feature_size**2)
     x = torch.bmm(x, torch.transpose(x, 1, 2)) / (feature_size**2)  # Bilinear
@@ -53,7 +51,5 @@ class BilinearResNet34(torch.nn.Module):
     x = torch.sqrt(x + 1e-5)
     x = torch.nn.functional.normalize(x)
     x = self.fc(x)
-
-    # assert x.size() == (N, 200)
 
     return x
