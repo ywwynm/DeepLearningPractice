@@ -10,21 +10,24 @@ import matplotlib.pyplot as plt
 import dataset
 from bcnn import BilinearResNet34
 
-random_seed = 96  # for splitting train set and validation set
-validation_size = 0.3
-eval_epoch_step = 4
+random_seed = 96       # for splitting train set and validation set
+validation_size = 0.3  # size of validation set / size of original train images downloaded from kaggle
+eval_epoch_step = 4    # steps between each model evaluation on train/validation set during training
 
-use_bilinear = True
-use_normalize = False
-resize_size = 448
-augment = True
+use_bilinear = True    # use bilinear ResNet34 model or not
+use_normalize = False  # adopt normalization to input images or not
+resize_size = 448      # as its name
+augment = True         # adopt data augmentation or not
 
-num_epoch = 10  # will be changed when fine tuning fc and all layers
-batch_size = 32
-lr = 1e-3
-weight_decay = 5e-4
+# will be changed when fine tuning fc and all layers
+# if you want to change this, please go to the last method in this file and edit num_epoch variable there
+num_epoch = 10  
 
-save_model = False  # will be changed when fine tuning fc and all layers
+batch_size = 32      # as its name
+lr = 1e-3            # learning rate
+weight_decay = 5e-4  # as its name
+
+save_model = False   # will be changed when fine tuning fc and all layers, you don't need to change this
 
 outputs_dir = os.path.join('outputs', 'output_' + time.strftime("%m-%d-%H-%M", time.localtime()))
 
